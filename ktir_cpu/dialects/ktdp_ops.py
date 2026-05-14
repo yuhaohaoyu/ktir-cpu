@@ -48,7 +48,11 @@ def ktdp__construct_memory_view(op, context, env):
     for attr in ("shape", "strides", "memory_space", "dtype"):
         if attr not in op.attributes:
             raise ValueError(f"construct_memory_view: missing required attribute '{attr}'")
-    shape = tuple(op.attributes["shape"])
+    # SSA size names are stored as strings by the parser; resolve them at runtime.
+    shape = tuple(
+        context.get_value(s) if isinstance(s, str) else s
+        for s in op.attributes["shape"]
+    )
     # SSA stride names are stored as strings by the parser; resolve them at runtime.
     strides = [context.get_value(s) if isinstance(s, str) else s for s in op.attributes["strides"]]
     memory_space = op.attributes["memory_space"]
@@ -147,8 +151,10 @@ def parse_construct_memory_view(op_text, parse_ctx: ParseContext):
     result_name = result_match.group(1)
     ptr_operand = result_match.group(2)
 
-    # Parse sizes — int values validated against memref dims; SSA names stored as None.
+    # Parse sizes — int values validated against memref dims; SSA names stored as strings
+    # and collected in ssa_size_operands so the executor can resolve them at runtime.
     sizes = None
+    ssa_size_operands = []
     sizes_match = re.search(r'sizes\s*:\s*\[([^\]]+)\]', op_text)
     if sizes_match:
         sizes = []
@@ -157,7 +163,9 @@ def parse_construct_memory_view(op_text, parse_ctx: ParseContext):
             try:
                 sizes.append(int(token))
             except ValueError:
-                sizes.append(None)  # SSA name
+                sizes.append(token)  # SSA name — resolved at runtime
+                if token not in ssa_size_operands:
+                    ssa_size_operands.append(token)
 
     # SSA stride operands: when a stride is a runtime SSA value (not a literal),
     # the parser stores the name as a string and appends it to ssa_stride_operands
@@ -194,16 +202,41 @@ def parse_construct_memory_view(op_text, parse_ctx: ParseContext):
         raise ValueError(
             f"construct_memory_view: memref<{memref_match.group(1)}> has no dimensions"
         )
-    memref_dims = [int(p) for p in parts[:-1]]
-    shape = tuple(memref_dims)
-    # If sizes is None, no checking is performed.
+    # '?' in the memref type means the dimension is dynamic (value only known at
+    # runtime).  We keep it as None until we can substitute the SSA size below.
+    memref_dims = [None if p == "?" else int(p) for p in parts[:-1]]
     if sizes is not None:
-        for i, s in enumerate(sizes):
-            if s is not None and s != memref_dims[i]:
-                raise ValueError(
-                    f"construct_memory_view: sizes[{i}]={s} does not match "
-                    f"memref dimension {memref_dims[i]}"
-                )
+        if len(sizes) != len(memref_dims):
+            raise ValueError(
+                f"construct_memory_view: sizes count {len(sizes)} does not match "
+                f"memref dimension count {len(memref_dims)}"
+            )
+        resolved = []
+        for i, (s, mem_d) in enumerate(zip(sizes, memref_dims)):
+            if mem_d is not None:
+                # concrete dim — s must equal it
+                if not isinstance(s, str) and s != mem_d:
+                    raise ValueError(
+                        f"construct_memory_view: sizes[{i}]={s} does not match "
+                        f"memref dimension {mem_d}"
+                    )
+                resolved.append(s)
+            else:
+                # dynamic dim ('?') — s must be an SSA name
+                if not isinstance(s, str):
+                    raise ValueError(
+                        f"construct_memory_view: sizes[{i}]={s} given for a '?' dim; "
+                        f"dynamic dim requires an SSA name, not a literal"
+                    )
+                resolved.append(s)
+        shape = tuple(resolved)
+    else:
+        if any(d is None for d in memref_dims):
+            raise ValueError(
+                "construct_memory_view: memref has dynamic '?' dim(s) but no sizes: "
+                "attribute was provided; dynamic dims require SSA sizes"
+            )
+        shape = tuple(memref_dims)
 
     attrs = parse_attr_block(op_text, parse_ctx.aliases)
     coordinate_set_str = attrs.get('coordinate_set')
@@ -221,9 +254,9 @@ def parse_construct_memory_view(op_text, parse_ctx: ParseContext):
     return Operation(
         result=result_name,
         op_type="ktdp.construct_memory_view",
-        operands=[ptr_operand] + ssa_stride_operands,
+        operands=[ptr_operand] + ssa_size_operands + ssa_stride_operands,
         attributes=attributes,
-        result_type=f"memref<{'x'.join(str(s) for s in shape)}x{dtype}>"
+        result_type=f"memref<{'x'.join(str(s) if isinstance(s, int) else '?' for s in shape)}x{dtype}>"
     )
 
 
