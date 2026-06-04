@@ -26,7 +26,7 @@ from ..parser_utils import find_ssa_names, parse_attr_list
 from .registry import register, register_parser
 
 
-@register("linalg.reduce", latency_category=LC.COMPUTE_FLOAT)
+@register("linalg.reduce", latency_category=LC.COMPUTE_REDUCE)
 def linalg__reduce(op, context, env):
     """Standard linalg.reduce — removes the reduced dimension."""
     # operands[0] is the ins tensor; the outs tensor is handled separately via outs_var
