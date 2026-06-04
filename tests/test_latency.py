@@ -92,6 +92,31 @@ def _run_matmul(path, func_name, entry, cfg, trace=False):
     return interp.get_latency_report()
 
 
+def _run_vector_reduce(path, func_name, entry, cfg, trace=False):
+    """Run a vector reduce (per-core tile) and return report."""
+    interp = KTIRInterpreter(latency_config=cfg, trace_latency=trace)
+    interp.load(path)
+    # Build tensor args using the interpreter's declared arg names so we
+    # match the parser's normalization (arg0, arg1, ...).
+    arg_names = interp.arg_names(func_name)
+    sizes = interp.tensor_input_output_sizes(func_name)
+
+    # Use the first argument as the input tensor for the reduce example.
+    arg0 = arg_names[0]
+    shape = sizes[arg0]["shape"]
+    # shape may be a tuple like (1, 4)
+    rng = np.random.default_rng(42)
+    inp = rng.standard_normal(tuple(shape)).astype(np.float16)
+
+    scalars = {k: v for k, v in entry["execute_kwargs"].items() if v is not None}
+    overlap = set(scalars.keys()) & {arg0}
+    assert not overlap, f"duplicate keys in tensors and scalars: {overlap}"
+
+    kwargs = {**scalars, **{arg0: inp}}
+    interp.execute_function(func_name, **kwargs)
+    return interp.get_latency_report()
+
+
 # ---------------------------------------------------------------------------
 # Vector add latency — memory-dominated
 # ---------------------------------------------------------------------------
@@ -231,6 +256,14 @@ class TestRoofline:
         # AI should be well below the ridge point (memory-bound)
         assert rf["arithmetic_intensity"] < rf["ridge_point"]
 
+    @pytest.mark.parametrize("path,func_name,entry", get_test_params("reduce_explicit_region"))
+    def test_vector_reduce_is_memory_bound(self, path, func_name, entry):
+        """A simple vector reduce should be memory-bound on the roofline."""
+        report = _run_vector_reduce(path, func_name, entry, HardwareConfig())
+        rf = report.roofline()
+        assert "arithmetic_intensity" in rf
+        assert rf["arithmetic_intensity"] < rf["ridge_point"]
+
     @pytest.mark.parametrize("path,func_name,entry", get_test_params("add_kernel"))
     def test_roofline_in_report_str(self, path, func_name, entry):
         """Roofline section should appear in report __str__."""
@@ -361,6 +394,40 @@ class TestSoftmaxLatency:
 
         # exp cycles should scale linearly with penalty
         assert scaled_exp == pytest.approx(baseline_exp * penalty, rel=1e-3)
+
+
+# ---------------------------------------------------------------------------
+# Reduce latency
+# ---------------------------------------------------------------------------
+
+class TestReduceLatency:
+    @pytest.mark.parametrize("path,func_name,entry", get_test_params("softmax_kernel_small"))
+    def test_reduce_charges_input_element_cycles(self, path, func_name, entry):
+        """linalg.reduce charges cycles based on *input* element count
+        (combiner work), not the reduced output shape."""
+        cfg = HardwareConfig()
+        report = _run_softmax(path, func_name, entry, cfg, trace=True)
+        core0 = report.counters[0]
+
+        reduce_entries = [e for e in core0.trace if e.op_type == "linalg.reduce"]
+        assert len(reduce_entries) > 0, "expected at least one linalg.reduce in softmax"
+
+        # softmax_small reduces 1×64 tiles → 1 element.
+        # Cost = 64 input elements / 64 simd_elements_per_cycle = 1.0 cycle.
+        expected_cycles = 64 / cfg.simd_elements_per_cycle
+        for entry_e in reduce_entries:
+            assert entry_e.cycles == pytest.approx(expected_cycles), (
+                f"linalg.reduce should charge {expected_cycles} cycles "
+                f"(input_elems / simd_width), got {entry_e.cycles}"
+            )
+
+    @pytest.mark.parametrize("path,func_name,entry", get_test_params("reduce_explicit_region"))
+    def test_reduce_kernel_is_memory_bound(self, path, func_name, entry):
+        """Vector reduce per-core tile should be memory-dominated."""
+        report = _run_vector_reduce(path, func_name, entry, HardwareConfig())
+        core0 = report.counters[0]
+        assert report.bottleneck == "memory"
+        assert core0.memory_cycles > core0.compute_cycles
 
 
 # ---------------------------------------------------------------------------

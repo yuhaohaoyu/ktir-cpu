@@ -45,6 +45,7 @@ class LatencyCategory(StrEnum):
     COMPUTE_TRANSCENDENTAL = "compute_transcendental"
     COMPUTE_INT = "compute_int"
     COMPUTE_MATMUL = "compute_matmul"
+    COMPUTE_REDUCE = "compute_reduce"
     COMM = "comm"
 
 
@@ -216,6 +217,14 @@ class LatencyTracker:
             flops = 2.0 * m * n * k
             cycles = flops / self.config.systolic_flops_per_cycle
             return ("compute", cycles, flops, 0)
+
+        if category == LC.COMPUTE_REDUCE:
+            # Reduction: the combiner (addf, maxf, …) processes every input
+            # element once.  Cost = input_elements / simd_width.
+            # operands[0] is the input tile.
+            n_elems = self._num_elements(operands[0] if operands else result, [])
+            cycles = n_elems / self.config.simd_elements_per_cycle
+            return ("compute", cycles, float(n_elems), 0)
 
         if category == LC.COMPUTE_TRANSCENDENTAL:
             # Transcendentals (exp, log, …): 1 FLOP per element, same
