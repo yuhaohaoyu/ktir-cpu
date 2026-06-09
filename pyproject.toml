@@ -23,6 +23,9 @@ dependencies = [
     "numpy>=1.20.0",
 ]
 
+[project.scripts]
+ktir-cpu-run = "cli.ktir_cpu_run:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
@@ -36,7 +39,7 @@ mlir-frontend = [
 [tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
-include = ["ktir_cpu*"]
+include = ["ktir_cpu*", "cli*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.mlir"]
