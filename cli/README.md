@@ -1,6 +1,18 @@
 # ktir-cpu-run CLI
 
-Command-line interface for running KTIR MLIR programs through the CPU interpreter.
+Command-line interface for running KTIR MLIR programs through the CPU interpreter. 
+This feature gives the means to allow users of ktir-cpu to treat it as a standalone
+KTIR execution virtual machine. This CLI interface will need to refine further.
+
+Run a kernel by MLIR file path:
+```bash
+ktir-cpu-run triton-ktir/vector_add_ktir.mlir --arg BLOCK_SIZE=128
+```
+
+Run a kernel by name:
+```bash
+ktir-cpu-run add_kernel --arg BLOCK_SIZE=256
+```
 
 ## Installation
 
