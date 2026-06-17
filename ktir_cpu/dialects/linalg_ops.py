@@ -194,7 +194,6 @@ def linalg__reduce(op, context, env):
         ]
 
     dims = op.attributes.get("dims")
-    # Back-compat: legacy single-axis attribute
     if dims is None and op.attributes.get("dim") is not None:
         dims = [op.attributes["dim"]]
 
