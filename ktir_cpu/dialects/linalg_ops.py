@@ -207,6 +207,8 @@ def linalg__reduce(op, context, env):
         else:
             # Fold each axis, fastest-moving (rightmost) first.
             folded = tile.data
+	    # Tree-folding each axis independently reorders element groupings vs.
+	    # MLIR's left-associative scalar loop — see test_reduce_multi_axis_treefold_bug.
             for d in sorted(dims, reverse=True):
                 folded = _tree_fold(
                     Tile(folded, tile.dtype, folded.shape),

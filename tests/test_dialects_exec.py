@@ -883,8 +883,8 @@ class TestLinalg:
 
     def test_reduce_multiop_combiner(self):
         # MULTI-OP combiner: max expressed as cmpf(ogt) + select. The general
-        # tree fold must run BOTH region ops - here is no single combiner name
-        # to map to a NumPy reduction - nd still return the correct max.
+        # tree fold must run BOTH region ops - there is no single combiner name
+        # to map to a NumPy reduction - and still return the correct max.
         data = np.array([[0.1, 0.9, 0.3, 0.2, 0.5, 0.05, 0.7, 0.05]], dtype=np.float16)
         neg_inf = np.float16("-inf")
         ctx = _ctx_with(**{"%x": Tile(data, "f16", data.shape),
@@ -949,6 +949,19 @@ class TestLinalg:
                               "left-associative sequential reduction MLIR "
                               "semantics prescribe.",
                        strict=True)
+    # Tree-fold vs. MLIR sequential order for dims=[0, 1] on shape (2, 3):
+    #
+    #   data = [[a, b, c],
+    #            [d, e, f]]
+    #
+    # MLIR (scalar loop, row-major left-associative):
+    #   ((((( a + b ) + c ) + d ) + e ) + f )
+    #
+    # Tree-fold (this impl): fold axis 1 first, then axis 0:
+    #   axis-1: (a+b)+c,  (d+e)+f
+    #   axis-0: ((a+b)+c) + ((d+e)+f)
+    #
+    # These groupings differ, so f16 rounding can diverge.
     def test_reduce_multi_axis_treefold_bug(self):
         # (3,4,2) reduce dims=[0,2]. Large cancelling values at [0,:,0] and
         # [2,:,0] expose the reordering: tree fold pairs partial sums from
