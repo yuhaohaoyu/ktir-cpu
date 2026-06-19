@@ -1,0 +1,28 @@
+name: Pre-Review Checks
+
+on:
+  # pull_request:
+  #   branches: [ main ]        # Runs automatically whenever a PR is opened or updated
+  push:
+    branches-ignore: [ main ] # Run automatically whenever a new, not-main, feature branch is pushed to the origin repo.
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- PYTHON LINTING & FORMATTING (RUFF) ---
+      - name: Install Ruff
+        run: pipx install ruff
+
+      - name: Run Ruff Formatter
+        run: ruff format --check .   # Fails if Python code styling is wrong
+
+      - name: Run Ruff Linter
+        run: ruff check .           # Fails on Python bugs or unused variables
+
+      # --- BASH LINTING (SHELLCHECK) ---
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master # Scans all .sh files automatically
