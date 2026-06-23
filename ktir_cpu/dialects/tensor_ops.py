@@ -22,7 +22,7 @@ import numpy as np
 from ..grid import CoreContext
 from ..dtypes import to_np_dtype
 from ..ir_types import Operation, Tile
-from ..parser_utils import find_ssa_names
+from ..parser_utils import find_ssa_names, parse_memref_dims
 from .registry import register, register_parser
 
 
@@ -449,17 +449,12 @@ def _parse_reshape_op(op_text, op_name):
     target_dtype = "f16"
     into_match = re.search(r'into\s+(?:tile|tensor)<([^>]+)>', op_text)
     if into_match:
-        inner = into_match.group(1)
-        parts = inner.split('x')
-        shape_parts = []
-        for p in parts[:-1]:
-            try:
-                shape_parts.append(int(p))
-            except ValueError:
-                pass
-        if shape_parts:
-            target_shape = tuple(shape_parts)
-            target_dtype = parts[-1]
+        try:
+            dims, dtype = parse_memref_dims(into_match.group(1))
+            target_shape = tuple(d for d in dims if d is not None)
+            target_dtype = dtype
+        except ValueError:
+            pass
 
     attributes = {}
     if target_shape:

@@ -21,7 +21,7 @@ mis-tokenised these by splitting on the ``x`` inside the dtype.
 
 import pytest
 
-from ktir_cpu.parser_utils import parse_multi_result_lhs, parse_tensor_type, extract_outs_operands
+from ktir_cpu.parser_utils import parse_multi_result_lhs, parse_tensor_or_memref_type, extract_outs_operands
 
 
 # ---------------------------------------------------------------------------

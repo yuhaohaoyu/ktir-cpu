@@ -135,6 +135,33 @@ def parse_tensor_type(type_str: str) -> Optional[Dict]:
         return None
     return {"shape": tuple(dims), "dtype": dtype}
 
+
+def parse_memref_dims(inner: str):
+    """Parse the inner content of memref<...> or similar into (dims, dtype).
+
+    Handles dtypes containing 'x' (e.g. 'index') by matching dim tokens
+    from the left. Dynamic dims ('?') are returned as None.
+
+    Args:
+        inner: The string inside angle brackets, e.g. "128x32xindex"
+
+    Returns:
+        (dims, dtype) where dims is a tuple of int|None and dtype is a string.
+
+    Raises:
+        ValueError: if no dimension tokens are found.
+    """
+    prefix = re.match(r'^((?:\d+\s*x\s*|[?]\s*x\s*)+)', inner)
+    if not prefix:
+        raise ValueError(f"no dimensions found in '{inner}'")
+    dims = tuple(
+        None if d == '?' else int(d)
+        for d in re.findall(r'(\d+|[?])\s*x', prefix.group(1))
+    )
+    dtype = inner[prefix.end():].split(',')[0].strip()
+    return dims, dtype
+
+
 def parse_numeric(s: str, dtype: Optional[str] = None) -> Any:
     """Parse a numeric string to a Python int or float.
 

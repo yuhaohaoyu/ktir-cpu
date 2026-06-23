@@ -334,18 +334,14 @@ def _adapt_construct_memory_view(mlir_op, attributes, result_type, operands):
 @MLIRTypeAdapter.install("ktdp.construct_distributed_memory_view")
 def _adapt_construct_distributed_memory_view(mlir_op, attributes, result_type, operands):
     """Extract shape and dtype from the result memref type."""
-    m = re.search(r'memref<([^>]+)>', result_type)
+    from ..parser_utils import parse_memref_dims
+
+    m = re.search(r'memref<([^>]+)>\s*$', result_type)
     if not m:
         raise ValueError(
             f"ktdp.construct_distributed_memory_view: cannot parse result type {result_type!r}"
         )
-    parts = m.group(1).split('x')
-    if len(parts) <= 1:
-        raise ValueError(
-            f"ktdp.construct_distributed_memory_view: memref<{m.group(1)}> has no dimensions"
-        )
-    attributes["dtype"] = parts[-1]
-    attributes["shape"] = tuple(int(p) for p in parts[:-1])
+    attributes["shape"], attributes["dtype"] = parse_memref_dims(m.group(1))
 
 
 @MLIRTypeAdapter.install("ktdp.construct_indirect_access_tile")
