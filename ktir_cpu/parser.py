@@ -623,7 +623,7 @@ class KTIRParser(KTIRParserBase):
 
         # Extract operands: all %name references in the text after op_type,
         # but before any { } attribute blocks.
-        operands = self._extract_operands(rest, None)
+        operands = self._extract_operands(rest)
 
         # Extract attributes from { ... } blocks.
         # Be careful not to confuse attribute blocks with region blocks
@@ -655,24 +655,14 @@ class KTIRParser(KTIRParserBase):
             outs_operands=outs_ops,
         )
 
-    def _extract_operands(self, text: str, result: Optional[str]) -> List[str]:
+    def _extract_operands(self, text: str) -> List[str]:
         """Extract SSA operands from operation text.
 
-        Finds all %name references, excluding:
-        - The result name itself
-        - References inside { } attribute blocks
+        Finds all %name references, excluding references inside { }
+        attribute blocks.
         """
-        # Remove all { ... } blocks to avoid picking up references inside
-        # attribute blocks.
         cleaned = re.sub(r'\{[^}]*\}', '', text)
-
-        operands = find_ssa_names(cleaned)
-
-        # Remove result name if present
-        if result:
-            operands = [o for o in operands if o != result]
-
-        return operands
+        return find_ssa_names(cleaned)
 
     def _extract_attributes(self, text: str, aliases: Optional[Dict] = None) -> Dict:
         """Extract attributes from the outermost { ... } block in operation text."""
