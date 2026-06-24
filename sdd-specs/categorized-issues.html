@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ktir-cpu Open Issues</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #f8f9fa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin-top: 2.5rem;
+    color: #333;
+  }
+
+  .subtitle {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .excluded {
+    background: #e8f4fd;
+    border-left: 3px solid #4a9eda;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .tier-desc {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-bottom: 2rem;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  col.col-num        { width: 50px; }
+  col.col-title      { width: auto; }
+  col.col-cat        { width: 130px; }
+  col.col-score      { width: 80px; }
+  col.col-rationale  { width: auto; }
+
+  th {
+    background: #2c3e50;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.6rem 0.5rem;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th.center { text-align: center; }
+
+  td {
+    padding: 0.5rem 0.5rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.85rem;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  td.center { text-align: center; }
+
+  td.num {
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  td.cat {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  td.score {
+    text-align: center;
+    font-weight: 500;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f5f8fa; }
+
+  /* Group separator row */
+  tr.group-sep td {
+    border-bottom: 2px solid #dde;
+    padding: 0;
+    height: 0;
+  }
+
+  .score-high   { color: #c0392b; }
+  .score-medium { color: #d35400; }
+  .score-low    { color: #7f8c8d; }
+
+  a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+  a:hover { text-decoration: underline; }
+
+  .related {
+    display: block;
+    font-size: 0.78rem;
+    color: #666;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  .note {
+    display: block;
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 0.2rem;
+    font-style: italic;
+  }
+
+  .legend {
+    table-layout: auto;
+    max-width: 400px;
+  }
+  .legend col { width: auto; }
+
+  .summary-table {
+    table-layout: auto;
+    max-width: 600px;
+  }
+  .summary-table col { width: auto; }
+
+  .footer-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 2rem;
+    border-top: 1px solid #ddd;
+    padding-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>ktir-cpu Open Issues</h1>
+<p class="subtitle">Generated 2026-06-24 from <a href="https://github.com/torch-spyre/ktir-cpu/issues">torch-spyre/ktir-cpu</a></p>
+
+<div class="excluded">
+  <strong>Excluded (already have open PRs):</strong>
+  #74 &larr; PR #80 &nbsp;|&nbsp;
+  #87 &larr; PR #137 &nbsp;|&nbsp;
+  #91 &larr; PR #132 &nbsp;|&nbsp;
+  #99 &larr; PR #111 &nbsp;|&nbsp;
+  #128 &larr; PR #117
+</div>
+
+<!-- ============ TIER 1 ============ -->
+<h2>Tier 1 &mdash; Critical</h2>
+<p class="tier-desc">High importance, well-scoped issues that block real workloads or produce incorrect results.</p>
+
+<table>
+  <colgroup>
+    <col class="col-num">
+    <col class="col-title">
+    <col class="col-cat">
+    <col class="col-cat">
+    <col class="col-score">
+    <col class="col-score">
+    <col class="col-rationale">
+  </colgroup>
+  <thead>
+    <tr>
+      <th class="center">#</th>
+      <th>Title</th>
+      <th class="center">Cat 1</th>
+      <th class="center">Cat 2</th>
+      <th class="center">Imp.</th>
+      <th class="center">Rigor</th>
+      <th>Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Distributed memory correctness cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/101">#101</a></td>
+      <td>construct_memory_view: base_ptr treated as stick index instead of element index</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-high">High</td>
+      <td class="score score-high">High</td>
+      <td>Any kernel computing its own pointer silently reads from the wrong HBM location.<span class="related">Related to: #102 (placement API follows up on this fix)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/25">#25</a></td>
+      <td>Fix cross-core communication: ktdp.reduce and ktdp.transfer correctness</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">5) Executor</td>
+      <td class="score score-high">High</td>
+      <td class="score score-high">High</td>
+      <td>BSP-replay execution produces incorrect results for every multi-core kernel using inter-core comm.<span class="related">Related to: #108 (efficient reduce backends), #126 (comm cost visibility)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Parsing / executor cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/139">#139</a></td>
+      <td>mlir_frontend path missing outs_operands and use_counts<span class="note">use_counts partially fixed by PR #140; outs_operands still open</span></td>
+      <td class="cat">4) Parsing</td>
+      <td class="cat">5) Executor</td>
+      <td class="score score-high">High</td>
+      <td class="score score-high">High</td>
+      <td>MLIRFrontendParser users get incorrect LX accounting &mdash; accumulators double-charged, tiles never freed.<span class="related">Related to: #119 (both block real LLM workloads on the frontend path)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/119">#119</a></td>
+      <td>Support for <code>linalg.matmul_transpose_b</code> vs matmul with an indexing map</td>
+      <td class="cat">4) Parsing</td>
+      <td class="cat">5) Executor</td>
+      <td class="score score-high">High</td>
+      <td class="score score-medium">Medium</td>
+      <td>Required for LLM forward passes &mdash; without it, transposed-B weights must be materialized at load or forward time.<span class="related">Related to: #139 (both block frontend LLM execution), #3 (decoder coverage)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Roofline -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/122">#122</a></td>
+      <td>roofline() reports the wrong dominant compute unit for mixed systolic/SIMD kernels</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-high">High</td>
+      <td class="score score-high">High</td>
+      <td>Roofline picks wrong unit and wrong ceiling for any kernel mixing systolic and SIMD work.<span class="related">Related to: #123 (tracking), #127 (occupancy metric), #125 (bandwidth dual)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Completeness cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/2">#2</a></td>
+      <td>[RFC conformance] Add RFC-explicit non-ktdp ops</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-high">High</td>
+      <td class="score score-medium">Medium</td>
+      <td>Blocks running any RFC example file end-to-end; the remaining ops are enumerated.<span class="related">Related to: #3 (decoder workload needs these ops)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/3">#3</a></td>
+      <td>Transformer decoder op coverage: gap analysis and MLIR examples</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-high">High</td>
+      <td class="score score-medium">Medium</td>
+      <td>No workload-driven coverage of a full decoder sub-graph &mdash; individual op tests pass but integration gaps remain invisible.<span class="related">Related to: #2 (RFC ops prerequisite), #77 (FFN test plan), #119 (transpose_b needed)</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============ TIER 2 ============ -->
+<h2>Tier 2 &mdash; Important</h2>
+<p class="tier-desc">Medium-to-high importance with good rigor: meaningful improvements to correctness, performance modeling, or infrastructure.</p>
+
+<table>
+  <colgroup>
+    <col class="col-num">
+    <col class="col-title">
+    <col class="col-cat">
+    <col class="col-cat">
+    <col class="col-score">
+    <col class="col-score">
+    <col class="col-rationale">
+  </colgroup>
+  <thead>
+    <tr>
+      <th class="center">#</th>
+      <th>Title</th>
+      <th class="center">Cat 1</th>
+      <th class="center">Cat 2</th>
+      <th class="center">Imp.</th>
+      <th class="center">Rigor</th>
+      <th>Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Indirect access safety cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/56">#56</a></td>
+      <td>MemoryOps contract undefined for non-rectangular variables_space_set</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>ValueError crash when vss enumerates fewer points than shape.prod() &mdash; no graceful path.<span class="related">Related to: #67 (both are MemoryOps contract gaps)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/67">#67</a></td>
+      <td>read_scattered cross-allocation safety: hard-guard the caller invariant</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Silent memory corruption if scattered read spans two allocations; only a docstring guards today.<span class="related">Related to: #56 (both are MemoryOps safety hardening)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Indirect access performance chain (all split from #52) -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/95">#95</a></td>
+      <td>Strided sub-rectangle fast path in MemoryOps.load/store</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Sub-tile loads that are strided but rectangular miss the contiguous fast path and fall to element-wise.<span class="related">Related to: #96, #97, #98 (perf chain from PR #52 &mdash; each unblocks the next)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/96">#96</a></td>
+      <td>Preserve BoxSet structure under permuted variables_space_order</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Permuted box falls back to O(n) point enumeration even though a permuted box is still a box.<span class="related">Related to: #95, #97, #98 (perf chain from PR #52)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/97">#97</a></td>
+      <td>MemoryOps.load/store accept ndarray coords to skip tolist()/tuple() conversion</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Python tolist()/tuple() conversion is the dominant overhead once vectorized coord build is reinstated.<span class="related">Related to: #95, #96, #98 (perf chain from PR #52)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/98">#98</a></td>
+      <td>Vectorized indirect coord build, reusing one subscript dispatch</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Reverted fast path had 2x duplicate logic; need to reintroduce without the second copy of subscript handling.<span class="related">Related to: #95, #96, #97 (perf chain from PR #52 &mdash; this is the capstone)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/53">#53</a></td>
+      <td>Should construct_indirect_access_tile compose with DistributedMemRef?</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-low">Low</td>
+      <td>Architectural decision blocking the indirect+distributed composition &mdash; no implementation path chosen yet.<span class="related">Related to: #95&ndash;#98 (indirect perf), #102 (distributed placement)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Distributed memory model cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/102">#102</a></td>
+      <td>HBM/LX memory bootstrap: explicit placement API and allocation-aware next_ptr</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>No way to place tensors at specific addresses &mdash; tests are brittle and silent aliasing is possible.<span class="related">Related to: #101 (follows up on the base_ptr fix), #31 (memory model accuracy)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/31">#31</a></td>
+      <td>HBM memory model: cross-load stick coalescing not modeled</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Adjacent loads sharing a stick are charged independently &mdash; latency model over-reports for dense access patterns.<span class="related">Related to: #102 (memory model), #76 (latency accuracy)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/108">#108</a></td>
+      <td>comm: add efficient ReduceBackend variants + attribute-based dispatch</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>CW-only ring models worst case; real hardware is bidirectional, so latency estimates are 2x pessimistic.<span class="related">Related to: #25 (comm correctness prerequisite), #126 (comm visibility)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Performance modeling cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/123">#123</a></td>
+      <td>[Tracking] latency_demo notebook &mdash; roofline improvements</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-medium">Medium</td>
+      <td>Umbrella tracking issue coordinating roofline correctness, metrics, and demo coverage work.<span class="related">Related to: #122, #127, #125, #126, #94 (all are children or siblings)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/127">#127</a></td>
+      <td>roofline(): add a time-based core-occupancy metric (true SM Active %)</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Binary grid_coverage masks barely-active cores; no way to distinguish full utilization from minimal dispatch.<span class="related">Related to: #122 (roofline correctness), #123 (tracking)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/125">#125</a></td>
+      <td>chip-level HBM bandwidth throughput</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>No bandwidth-axis dual of chip_throughput &mdash; memory-bound kernels lack a chip-level efficiency metric.<span class="related">Related to: #122 (roofline gaps), #123 (tracking)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/126">#126</a></td>
+      <td>latency_demo notebook: surface cross-core reduce (communication) cost</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Comm latency is computed but invisible in the analysis surface &mdash; users cannot see where comm dominates.<span class="related">Related to: #25 (comm correctness), #108 (reduce backends), #123 (tracking)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/94">#94</a></td>
+      <td>Add latency estimation demo notebook</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>The primary analysis surface for cycle-approximate latency has no committed, tested notebook in the repo.<span class="related">Related to: #123 (tracking), #126 (comm view), #76 (reduce latency)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/76">#76</a></td>
+      <td>linalg.reduce latency: charges output element count instead of deferring to combiner region</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">5) Executor</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Double-counts cycles for every reduce op &mdash; combiner region already fires, then output elements are charged on top.<span class="related">Related to: #85 (linalg.reduce semantics), #94 (notebook would expose this)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Parsing cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/40">#40</a></td>
+      <td>@register should accept an optional attributes schema</td>
+      <td class="cat">4) Parsing</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Attributes are dict[str, Any] with no per-op contract &mdash; consumers assuming int silently break on str entries.<span class="related">Related to: #48 (both are parser robustness gaps)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/48">#48</a></td>
+      <td>Potential issue with #digits being excluded by dialect-specific operand regexes</td>
+      <td class="cat">4) Parsing</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-medium">Medium</td>
+      <td>Dialect parsers using <code>%\w+</code> would silently truncate <code>%base#N</code> to <code>%base</code> &mdash; needs audit to confirm scope.<span class="related">Related to: #40 (parser robustness), #139 (frontend path issues)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Executor cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/88">#88</a></td>
+      <td>ktdp.reduce / ktdp.coreid are non-spec ops in the regex executor</td>
+      <td class="cat">5) Executor</td>
+      <td class="cat">6) Completeness</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Executor registers handlers for ops that don't exist in the authoritative dialect &mdash; spec drift.<span class="related">Related to: #25 (ktdp.reduce correctness), #2 (RFC conformance)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/78">#78</a></td>
+      <td>Parallel GridExecutor to speed up multi-core simulation</td>
+      <td class="cat">5) Executor</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-medium">Medium</td>
+      <td>Simulation wall-clock scales linearly with core count even for independent cores; 32-core runs are impractical.<span class="related">Related to: #25 (multi-core correctness should land first)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Test / CI cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/92">#92</a></td>
+      <td>test_ops.py: incomplete dtype coverage for arithmetic and math ops</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td><code>_tile</code> helper ignores dtype arg &mdash; all tests secretly run float16 regardless of declared dtype.<span class="related">Related to: #77 (both are test coverage gaps)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/77">#77</a></td>
+      <td>Kernel test plan: simple feedforward (FFN / SwiGLU)</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-medium">Medium</td>
+      <td>No realistic sub-graph regression test &mdash; op-level tests pass but interaction bugs across a real workload are invisible.<span class="related">Related to: #3 (decoder coverage), #92 (op test gaps)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/7">#7</a></td>
+      <td>[CI] Install ktir-mlir-frontend Python wheels</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-medium">Medium</td>
+      <td class="score score-high">High</td>
+      <td>Frontend adapter tests auto-skip in CI &mdash; regressions in the MLIR path are invisible until manual local runs.<span class="related">Related to: #139 (frontend path bugs stay hidden without CI)</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============ TIER 3 ============ -->
+<h2>Tier 3 &mdash; Backlog</h2>
+<p class="tier-desc">Lower importance, currently harmless, open design questions, or incremental coverage improvements.</p>
+
+<table>
+  <colgroup>
+    <col class="col-num">
+    <col class="col-title">
+    <col class="col-cat">
+    <col class="col-cat">
+    <col class="col-score">
+    <col class="col-score">
+    <col class="col-rationale">
+  </colgroup>
+  <thead>
+    <tr>
+      <th class="center">#</th>
+      <th>Title</th>
+      <th class="center">Cat 1</th>
+      <th class="center">Cat 2</th>
+      <th class="center">Imp.</th>
+      <th class="center">Rigor</th>
+      <th>Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Spec divergence cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/85">#85</a></td>
+      <td>linalg.reduce: multi-axis reduce and outs-init not handled per MLIR semantics</td>
+      <td class="cat">5) Executor</td>
+      <td class="cat">6) Completeness</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-high">High</td>
+      <td>Diverges from MLIR spec but currently harmless &mdash; frontend never emits multi-axis reduce or non-zero init.<span class="related">Related to: #76 (linalg.reduce latency bug)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/75">#75</a></td>
+      <td>Fix misleading linalg.matmul comment in LatencyEstimator._estimate</td>
+      <td class="cat">3) Perf Modeling</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-high">High</td>
+      <td>Comment says "no HBM traffic" as if verified &mdash; real reason is systolic ops are modeled compute-only by design.<span class="related">Related to: #122 (roofline correctness context)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Test example coverage cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/55">#55</a></td>
+      <td>Add distributed memory view examples and test_examples coverage</td>
+      <td class="cat">2) Distributed Memory</td>
+      <td class="cat">6) Completeness</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-high">High</td>
+      <td>Existing distributed-view-copy.mlir is not wired into test_examples.py &mdash; no automated frontend coverage.<span class="related">Related to: #47 (both are example/test coverage), #7 (CI for frontend)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/47">#47</a></td>
+      <td>Add more dynamic-shape MLIR examples (varying dtypes, 2-D, multi-core)</td>
+      <td class="cat">6) Completeness</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-high">High</td>
+      <td>Only one minimal single-core dynamic example exists &mdash; dtype/rank/multi-core variants untested.<span class="related">Related to: #55 (both are example coverage), #92 (dtype gap)</span></td>
+    </tr>
+    <tr class="group-sep"><td colspan="7"></td></tr>
+    <!-- Open design questions cluster -->
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/68">#68</a></td>
+      <td>[Question] cso direct-path: pointwise or sort-then-gather</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-low">Low</td>
+      <td>Open design question on whether direct-path cso should match indirect-path sort-then-gather semantics.<span class="related">Related to: #60, #28 (all are indirect-access semantic questions)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/60">#60</a></td>
+      <td>[Question] Coordinate collision semantics for indirect_store / scatter</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-low">Low</td>
+      <td>Last-writer-wins works in practice; question is whether to spec deterministic or undefined behavior.<span class="related">Related to: #68, #28 (all are indirect-access semantic questions)</span></td>
+    </tr>
+    <tr>
+      <td class="num"><a href="https://github.com/torch-spyre/ktir-cpu/issues/28">#28</a></td>
+      <td>[Question] Out-of-Set Element Semantics for ktdp.load / ktdp.store</td>
+      <td class="cat">1) Indirect Access</td>
+      <td class="cat">&mdash;</td>
+      <td class="score score-low">Low</td>
+      <td class="score score-low">Low</td>
+      <td>Out-of-set positions are zero-filled on load and ignored on store &mdash; works, but not formally spec'd.<span class="related">Related to: #68, #60 (all are indirect-access semantic questions)</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============ LEGEND ============ -->
+<h2>Category Legend</h2>
+<table class="legend">
+  <thead>
+    <tr><th class="center">#</th><th>Category</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="center">1</td><td>Indirect Access</td></tr>
+    <tr><td class="center">2</td><td>Distributed Memory</td></tr>
+    <tr><td class="center">3</td><td>Performance Modeling and Projection</td></tr>
+    <tr><td class="center">4</td><td>Parsing</td></tr>
+    <tr><td class="center">5</td><td>Executor</td></tr>
+    <tr><td class="center">6</td><td>Completeness and Others</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ SUMMARY ============ -->
+<h2>Summary</h2>
+<table class="summary-table">
+  <thead>
+    <tr><th>Tier</th><th class="center">Count</th><th>Profile</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Tier 1 &mdash; Critical</td><td class="center">7</td><td>High importance; blocks workloads or produces wrong results</td></tr>
+    <tr><td>Tier 2 &mdash; Important</td><td class="center">23</td><td>Meaningful correctness, perf, or infra improvements</td></tr>
+    <tr><td>Tier 3 &mdash; Backlog</td><td class="center">7</td><td>Currently harmless, incremental, or open design questions</td></tr>
+    <tr><td><strong>Total</strong></td><td class="center"><strong>32</strong></td><td><strong>37 open issues, 5 already have PRs</strong></td></tr>
+  </tbody>
+</table>
+
+<p class="footer-note">
+  Note: PR #138 (open) is related to #122 and #126 but tackles a narrower fix (excluding comm bytes from roofline denominator) rather than fully resolving either.
+</p>
+
+</body>
+</html>
