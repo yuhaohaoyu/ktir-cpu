@@ -1194,7 +1194,7 @@ def test_parse_distributed_view_index_dtype():
     from ktir_cpu.parser import ParseContext
 
     op_text = (
-        "%dv = ktdp.construct_distributed_memory_view "
+        "ktdp.construct_distributed_memory_view "
         "(%v0, %v1 : memref<64x32xindex>, memref<64x32xindex>) "
         ": memref<128x32xindex>"
     )
