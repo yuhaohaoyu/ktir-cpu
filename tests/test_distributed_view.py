@@ -1191,13 +1191,21 @@ def test_distributed_store_slow_path_cross_boundary():
 def test_parse_distributed_view_index_dtype():
     """split('x') must not break on dtypes containing 'x' like 'index'."""
     from ktir_cpu.dialects.ktdp_ops import parse_construct_distributed_memory_view
-    from ktir_cpu.parser import ParseContext
+    from ktir_cpu.parser import KTIRParser, ParseContext
 
-    op_text = (
+    # Dialect parser directly (body only, no LHS — as the dispatcher delivers it)
+    body_text = (
         "ktdp.construct_distributed_memory_view "
         "(%v0, %v1 : memref<64x32xindex>, memref<64x32xindex>) "
         ": memref<128x32xindex>"
     )
-    op = parse_construct_distributed_memory_view(op_text, ParseContext(aliases={}))
+    op = parse_construct_distributed_memory_view(body_text, ParseContext(aliases={}))
     assert op.attributes["shape"] == (128, 32)
     assert op.attributes["dtype"] == "index"
+
+    # Dispatcher integration (full op line with LHS assignment)
+    full_op = "%dv = " + body_text
+    op2 = KTIRParser()._parse_operation_text(full_op)
+    assert op2.result == "%dv"
+    assert op2.attributes["shape"] == (128, 32)
+    assert op2.attributes["dtype"] == "index"
